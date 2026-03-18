@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gym Tracker Pro+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0d0d0d;
+      color: white;
+      margin: 0;
+    }
+    .header {
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      padding: 15px;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #2a2a2a;
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .start { background: #00c853; }
+    .stop { background: #ff5252; }
+    .timer {
+      font-size: 32px;
+      margin-top: 10px;
+    }
+    .progress {
+      height: 10px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: #00c853;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+    .row input {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+<div class="header"> Gym Tracker Pro+</div>
+<div class="container">
+  <div class="card">
+    <h3>Mode</h3>
+    <select id="mode">
+      <option value="1">Maintain</option>
+      <option value="1.2">Bulk</option>
+      <option value="0.8">Cut</option>
+    </select>
+  </div>
+  <div class="card">
+    <h3>Workout</h3>
+    <select id="type">
+      <optgroup label="Cardio">
+        <option value="8">Treadmill</option>
+        <option value="7">Elliptical</option>
+        <option value="7">Bike</option>
+        <option value="8">Stairs</option>
+      </optgroup>
+      <optgroup label="Upper Body">
+        <option value="5">Chest Press</option>
+        <option value="5">Lat Pulldown</option>
+        <option value="5">Shoulder Press</option>
+        <option value="5">Bicep Curl</option>
+        <option value="5">Tricep Pushdown</option>
+      </optgroup>
+      <optgroup label="Lower Body">
+        <option value="6">Leg Press</option>
+        <option value="6">Leg Curl</option>
+        <option value="6">Leg Extension</option>
+      </optgroup>
+    </select>
+    <input id="weight" type="number" placeholder="Weight (lbs)">
+    <button class="start" onclick="startTimer()">Start Workout</button>
+    <button class="stop" onclick="stopWorkout()">End Workout</button>
+    <div class="timer" id="timer">00:00</div>
+    <p id="exerciseDisplay">No workout started</p>
+  </div>
+  <div class="card">
+    <h3>Calories</h3>
+    <p id="burned">Burned: 0</p>
+    <p id="eat">Eat: 0</p>
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Macros</h3>
+    <div class="row">
+      <input id="protein" type="number" placeholder="Protein">
+      <input id="carbs" type="number" placeholder="Carbs">
+      <input id="fat" type="number" placeholder="Fat">
+    </div>
+    <button onclick="addMacros()">Add Food</button>
+    <p id="macroTotals"></p>
+  </div>
+  <div class="card">
+    <h3>Daily Summary</h3>
+    <p id="summary"></p>
+  </div>
+</div>
+<script>
+let seconds = 0;
+let timerInterval;
+let totals = JSON.parse(localStorage.getItem("totals")) || {
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fat: 0
+};
+function startTimer() {
+  seconds = 0;
+  const exercise = document.getElementById("type");
+  const name = exercise.options[exercise.selectedIndex].text;
+  document.getElementById("exerciseDisplay").innerText = name;
+  timerInterval = setInterval(() => {
+    seconds++;
+    document.getElementById("timer").innerText = formatTime(seconds);
+  }, 1000);
+}
+function stopWorkout() {
+  clearInterval(timerInterval);
+  const met = document.getElementById("type").value;
+  const weight = document.getElementById("weight").value;
+  if (!weight) return alert("Enter weight");
+  const minutes = seconds / 60;
+  const kg = weight * 0.453592;
+  const burned = Math.round((met * 3.5 * kg / 200) * minutes);
+  const mode = document.getElementById("mode").value;
+  const eat = Math.round(burned * mode);
+  totals.calories += burned;
+  localStorage.setItem("totals", JSON.stringify(totals));
+  document.getElementById("burned").innerText = "Burned: " + burned;
+  document.getElementById("eat").innerText = "Eat: " + eat;
+  document.getElementById("bar").style.width = Math.min(burned / 10, 100) + "%";
+  updateSummary();
+}
+function formatTime(sec) {
+  let m = Math.floor(sec / 60);
+  let s = sec % 60;
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+function addMacros() {
+  totals.protein += Number(document.getElementById("protein").value);
+  totals.carbs += Number(document.getElementById("carbs").value);
+  totals.fat += Number(document.getElementById("fat").value);
+  localStorage.setItem("totals", JSON.stringify(totals));
+  updateSummary();
+}
+function updateSummary() {
+  document.getElementById("macroTotals").innerText =
+    `Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g`;
+  document.getElementById("summary").innerText =
+    `Calories Burned Today: ${totals.calories}`;
+}
+updateSummary();
+</script>
+</body>
+</html>
+
+
