@@ -3,29 +3,36 @@
 <head>
   <title>Gym Tracker Pro+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00c853">
+
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, sans-serif;
       background: #0d0d0d;
       color: white;
       margin: 0;
     }
+
     .header {
       padding: 20px;
       font-size: 24px;
       font-weight: bold;
     }
+
     .container {
       padding: 15px;
     }
+
     .card {
       background: #1a1a1a;
       padding: 15px;
       border-radius: 15px;
       margin-bottom: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
-    select, input {
+
+    input, select {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
@@ -34,6 +41,7 @@
       background: #2a2a2a;
       color: white;
     }
+
     button {
       width: 100%;
       padding: 14px;
@@ -41,14 +49,16 @@
       border-radius: 10px;
       border: none;
       font-weight: bold;
-      font-size: 16px;
     }
+
     .start { background: #00c853; }
     .stop { background: #ff5252; }
+
     .timer {
       font-size: 32px;
       margin-top: 10px;
     }
+
     .progress {
       height: 10px;
       background: #333;
@@ -56,139 +66,241 @@
       overflow: hidden;
       margin-top: 10px;
     }
+
     .bar {
       height: 100%;
       width: 0%;
       background: #00c853;
     }
+
     .row {
       display: flex;
       gap: 10px;
     }
+
     .row input {
       flex: 1;
     }
   </style>
 </head>
+
 <body>
-<div class="header"> Gym Tracker Pro+</div>
+
+<div class="header">🏋️ Gym Tracker Pro+</div>
+
 <div class="container">
-  <div class="card">
-    <h3>Mode</h3>
-    <select id="mode">
-      <option value="1">Maintain</option>
-      <option value="1.2">Bulk</option>
-      <option value="0.8">Cut</option>
-    </select>
-  </div>
-  <div class="card">
-    <h3>Workout</h3>
-    <select id="type">
-      <optgroup label="Cardio">
-        <option value="8">Treadmill</option>
-        <option value="7">Elliptical</option>
-        <option value="7">Bike</option>
-        <option value="8">Stairs</option>
-      </optgroup>
-      <optgroup label="Upper Body">
-        <option value="5">Chest Press</option>
-        <option value="5">Lat Pulldown</option>
-        <option value="5">Shoulder Press</option>
-        <option value="5">Bicep Curl</option>
-        <option value="5">Tricep Pushdown</option>
-      </optgroup>
-      <optgroup label="Lower Body">
-        <option value="6">Leg Press</option>
-        <option value="6">Leg Curl</option>
-        <option value="6">Leg Extension</option>
-      </optgroup>
-    </select>
-    <input id="weight" type="number" placeholder="Weight (lbs)">
-    <button class="start" onclick="startTimer()">Start Workout</button>
-    <button class="stop" onclick="stopWorkout()">End Workout</button>
-    <div class="timer" id="timer">00:00</div>
-    <p id="exerciseDisplay">No workout started</p>
-  </div>
-  <div class="card">
-    <h3>Calories</h3>
-    <p id="burned">Burned: 0</p>
-    <p id="eat">Eat: 0</p>
-    <div class="progress">
-      <div class="bar" id="bar"></div>
-    </div>
-  </div>
-  <div class="card">
-    <h3>Macros</h3>
-    <div class="row">
-      <input id="protein" type="number" placeholder="Protein">
-      <input id="carbs" type="number" placeholder="Carbs">
-      <input id="fat" type="number" placeholder="Fat">
-    </div>
-    <button onclick="addMacros()">Add Food</button>
-    <p id="macroTotals"></p>
-  </div>
-  <div class="card">
-    <h3>Daily Summary</h3>
-    <p id="summary"></p>
+
+<!-- PROFILE -->
+<div class="card">
+  <h3>Your Info</h3>
+  <input id="age" type="number" placeholder="Age">
+  <input id="height" type="number" placeholder="Height (inches)">
+  <input id="weightProfile" type="number" placeholder="Weight (lbs)">
+  <button onclick="saveProfile()">Save Profile</button>
+
+  <p id="bmrDisplay">BMR: -</p>
+  <p id="dailyCalories">Daily Calories: -</p>
+</div>
+
+<!-- GOAL -->
+<div class="card">
+  <h3>Goal</h3>
+  <select id="mode" onchange="updateProfile()">
+    <option value="1">Maintain</option>
+    <option value="1.2">Bulk</option>
+    <option value="0.8">Cut</option>
+  </select>
+</div>
+
+<!-- WORKOUT -->
+<div class="card">
+  <h3>Workout</h3>
+
+  <select id="type">
+    <optgroup label="Cardio">
+      <option value="8">Treadmill</option>
+      <option value="7">Elliptical</option>
+      <option value="7">Bike</option>
+      <option value="8">Stairs</option>
+    </optgroup>
+
+    <optgroup label="Upper Body">
+      <option value="5">Chest Press</option>
+      <option value="5">Lat Pulldown</option>
+      <option value="5">Shoulder Press</option>
+      <option value="5">Bicep Curl</option>
+      <option value="5">Tricep Pushdown</option>
+    </optgroup>
+
+    <optgroup label="Lower Body">
+      <option value="6">Leg Press</option>
+      <option value="6">Leg Curl</option>
+      <option value="6">Leg Extension</option>
+    </optgroup>
+  </select>
+
+  <button class="start" onclick="startTimer()">Start Workout</button>
+  <button class="stop" onclick="stopWorkout()">End Workout</button>
+
+  <div class="timer" id="timer">00:00</div>
+  <p id="exerciseDisplay">No workout started</p>
+</div>
+
+<!-- CALORIES -->
+<div class="card">
+  <h3>Calories</h3>
+  <p id="burned">Burned: 0</p>
+  <p id="eat">Eat Today: 0</p>
+
+  <div class="progress">
+    <div class="bar" id="bar"></div>
   </div>
 </div>
+
+<!-- MACROS -->
+<div class="card">
+  <h3>Macros</h3>
+
+  <div class="row">
+    <input id="protein" type="number" placeholder="Protein">
+    <input id="carbs" type="number" placeholder="Carbs">
+    <input id="fat" type="number" placeholder="Fat">
+  </div>
+
+  <button onclick="addMacros()">Add Food</button>
+  <p id="macroTotals"></p>
+</div>
+
+<!-- SUMMARY -->
+<div class="card">
+  <h3>Daily Summary</h3>
+  <p id="summary"></p>
+</div>
+
+</div>
+
 <script>
 let seconds = 0;
 let timerInterval;
+
+const ageInput = document.getElementById("age");
+const heightInput = document.getElementById("height");
+const weightProfileInput = document.getElementById("weightProfile");
+
+const burnedText = document.getElementById("burned");
+const eatText = document.getElementById("eat");
+const bar = document.getElementById("bar");
+
 let totals = JSON.parse(localStorage.getItem("totals")) || {
   calories: 0,
   protein: 0,
   carbs: 0,
   fat: 0
 };
+
+let profile = JSON.parse(localStorage.getItem("profile")) || {
+  age: 0, height: 0, weight: 0, bmr: 0
+};
+
+function saveProfile() {
+  const age = Number(ageInput.value);
+  const height = Number(heightInput.value);
+  const weight = Number(weightProfileInput.value);
+
+  if (!age || !height || !weight) return alert("Fill all fields");
+
+  const kg = weight * 0.453592;
+  const cm = height * 2.54;
+
+  const bmr = Math.round((10 * kg) + (6.25 * cm) - (5 * age) + 5);
+
+  profile = { age, height, weight, bmr };
+  localStorage.setItem("profile", JSON.stringify(profile));
+
+  updateProfile();
+}
+
+function updateProfile() {
+  if (!profile.bmr) return;
+
+  document.getElementById("bmrDisplay").innerText = "BMR: " + profile.bmr;
+
+  const mode = document.getElementById("mode").value;
+  const daily = Math.round(profile.bmr * mode);
+
+  document.getElementById("dailyCalories").innerText =
+    "Daily Calories: " + daily;
+}
+
 function startTimer() {
   seconds = 0;
+
   const exercise = document.getElementById("type");
   const name = exercise.options[exercise.selectedIndex].text;
+
   document.getElementById("exerciseDisplay").innerText = name;
+
   timerInterval = setInterval(() => {
     seconds++;
     document.getElementById("timer").innerText = formatTime(seconds);
   }, 1000);
 }
+
 function stopWorkout() {
   clearInterval(timerInterval);
+
+  if (!profile.weight) return alert("Set profile first");
+
   const met = document.getElementById("type").value;
-  const weight = document.getElementById("weight").value;
-  if (!weight) return alert("Enter weight");
+  const kg = profile.weight * 0.453592;
   const minutes = seconds / 60;
-  const kg = weight * 0.453592;
+
   const burned = Math.round((met * 3.5 * kg / 200) * minutes);
   const mode = document.getElementById("mode").value;
-  const eat = Math.round(burned * mode);
+
+  const eat = Math.round((profile.bmr + burned) * mode);
+
   totals.calories += burned;
   localStorage.setItem("totals", JSON.stringify(totals));
-  document.getElementById("burned").innerText = "Burned: " + burned;
-  document.getElementById("eat").innerText = "Eat: " + eat;
-  document.getElementById("bar").style.width = Math.min(burned / 10, 100) + "%";
+
+  burnedText.innerText = "Burned: " + burned;
+  eatText.innerText = "Eat Today: " + eat;
+
+  bar.style.width = Math.min(burned / 10, 100) + "%";
+
   updateSummary();
 }
+
+function addMacros() {
+  totals.protein += Number(document.getElementById("protein").value);
+  totals.carbs += Number(document.getElementById("carbs").value);
+  totals.fat += Number(document.getElementById("fat").value);
+
+  localStorage.setItem("totals", JSON.stringify(totals));
+  updateSummary();
+}
+
+function updateSummary() {
+  document.getElementById("macroTotals").innerText =
+    `Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g`;
+
+  document.getElementById("summary").innerText =
+    `Calories Burned Today: ${totals.calories}`;
+}
+
 function formatTime(sec) {
   let m = Math.floor(sec / 60);
   let s = sec % 60;
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
-function addMacros() {
-  totals.protein += Number(document.getElementById("protein").value);
-  totals.carbs += Number(document.getElementById("carbs").value);
-  totals.fat += Number(document.getElementById("fat").value);
-  localStorage.setItem("totals", JSON.stringify(totals));
-  updateSummary();
-}
-function updateSummary() {
-  document.getElementById("macroTotals").innerText =
-    `Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g`;
-  document.getElementById("summary").innerText =
-    `Calories Burned Today: ${totals.calories}`;
-}
+
+updateProfile();
 updateSummary();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
+
 </body>
 </html>
-
-
